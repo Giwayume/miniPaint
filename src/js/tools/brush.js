@@ -10,6 +10,7 @@ class Brush_class extends Base_tools_class {
 		this.name = 'brush';
 		this.layer = {};
 		this.params_hash = false;
+		this.pointer_pressure = null;
 	}
 
 	dragStart(event) {
@@ -41,6 +42,11 @@ class Brush_class extends Base_tools_class {
 	load() {
 		var _this = this;
 
+		//pointer events
+		document.addEventListener('pointermove', function (event) {
+			_this.pointermove(event);
+		});
+
 		//mouse events
 		document.addEventListener('mousedown', function (event) {
 			_this.dragStart(event);
@@ -62,6 +68,10 @@ class Brush_class extends Base_tools_class {
 		document.addEventListener('touchend', function (event) {
 			_this.dragEnd(event);
 		});
+	}
+
+	pointermove(e) {
+		this.pointer_pressure = typeof e.pressure !== 'undefined' ? e.pressure : null;
 	}
 
 	mousedown(e) {
@@ -110,10 +120,11 @@ class Brush_class extends Base_tools_class {
 		//detect line size
 		var size = params.size;
 		var new_size = size;
-		/*if(typeof e.pressure !== "undefined"){ // needs testing !!!
-			new_size = size * e.pressure * 2; //e.pressure has range [0 - 1]
+
+		if(this.pointer_pressure != null){
+			new_size = size * this.pointer_pressure * 2; //pointer_pressure has range [0 - 1]
 		}
-		else*/ if (params.smart_brush == true) {
+		else if (params.smart_brush == true) {
 			new_size = size + size / max_speed * mouse.speed_average * power;
 			new_size = Math.max(new_size, size / 4);
 			new_size = Math.round(new_size);
